@@ -19,14 +19,18 @@
                     <h4 class="text-center mb-3">Add Product</h4>
                     <form action="" id="myForm">
                         <div class="d-flex justify-content-center">
-                            <div class="form-floating">
-                                <select class="form-select" id="floatingSelect">
-                                  <option value="0">None</option>
-                                  <option value="Shirt-Tshirt">Shirt-Tshirt</option>
-                                  <option value="Pant-Jeans">Pant-Jeans</option>
-                                  <option value="Pant-Trouser">Pant-Trouser</option>
-                                </select>
+                            <div class="form-group">
                                 <label for="floatingSelect">Category-Subcategory</label>
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select" id="floatingSelect">
+                                            <option value="0">None</option>
+                                            <option value="Shirt-Tshirt">Shirt-Tshirt</option>
+                                            <option value="Pant-Jeans">Pant-Jeans</option>
+                                            <option value="Pant-Trouser">Pant-Trouser</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-floating ms-3">                           
                                 <input type="number" id="id1" class="form-control" placeholder="unit price"/>
@@ -98,13 +102,20 @@
                                 <span class="input-group-text">Adjust</span>
                                 <input type="text" class="form-control" id="adjust">
                             </div>
-                            <div class="form-floating">
+                            <div class="input-group mb-3">
+                                <label class="input-group-text" for="paymentTypeSelect">Payment Type</label>
+                                <select class="form-select" id="paymentTypeSelect">
+                                  <option value="cash">Cash</option>
+                                  <option value="card">Card</option>
+                                </select>
+                            </div>
+                            <!-- <div class="form-floating">
                                 <select class="form-select" id="paymentTypeSelect">
                                   <option value="cash">Cash</option>
                                   <option value="card">Card</option>
                                 </select>
                                 <label for="paymentTypeSelect">Payment Type</label>
-                            </div>
+                            </div> -->
                             <div id="card-details" style="display: none;">
                                 <div class="form-floating mt-3">
                                     <select class="form-select" id="bankSelect">
@@ -138,7 +149,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-        $('select').select2();
+        $('#floatingSelect').select2();
         $('#paymentTypeSelect').change(function() {
             if ($(this).val() === 'card') {
                 $('#card-details').show();

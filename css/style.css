@@ -23,24 +23,4 @@
   .invoice .item-name {
     text-transform: capitalize;
   }
-  
 
-/* select2 styling */
-/* Adjust the position and size of the label */
-/* Adjust the position and size of the label */
-.form-floating label {
-  top: -1rem;
-  font-size: 0.875rem;
-}
-
-/* Adjust the height and padding of the select element */
-.form-floating select {
-  height: 3rem;
-  padding-top: 1.75rem;
-}
-
-/* Increase the height and font size of the select2 dropdown */
-.select2-container--bootstrap .select2-selection--single {
-  height: calc(1.5em + 1.75rem + 2px);
-  font-size: 0.875rem;
-}
