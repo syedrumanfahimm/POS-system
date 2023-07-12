@@ -69,7 +69,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-7">
-                    <div id="invoiceResult">
+                    <div id="invoiceResult" class="mb-5 bg-primary-subtle">
                         
                     </div>
                 </div>
@@ -231,19 +231,46 @@
         });
         $('#finalSubmit-form').submit(function(event) {
             event.preventDefault(); // Prevent form submission
+
+            var selectedOption = $('#paymentTypeSelect').val();
+            var cashReceive = parseFloat(($('#receive').val()));
+            var cashChange = parseFloat(($('#dueField').val()));
+            var  adjustValue = 0.0;
+            if($('#adjust').val() !== '')
+            {
+                adjustValue = parseFloat($('#adjust').val());
+            }
+
+            var invoiceHTML = '<h2 class="text-center mb-4 p-3">Point of Sale Invoice</h2>';
+            invoiceHTML += '<div class="row p-3">';
+            invoiceHTML += '<div class="col-md-6">';
+            invoiceHTML += '<h5>Company Information:</h5>';
+            invoiceHTML += '<p>Company Name</p>';
+            invoiceHTML += '<p>Address Line 1</p>';
+            invoiceHTML += '<p>Address Line 2</p>';
+            invoiceHTML += '<p>City, State, Zip Code</p>';
+            invoiceHTML += '</div>';
+            invoiceHTML += '<div class="col-md-6 text-md-right">';
+            invoiceHTML += '<h5>Bill Details:</h5>';
+            invoiceHTML += '<p><strong>Bill No:</strong> 12345</p>';
+            invoiceHTML += '<p><strong>Date:</strong> July 11, 2023</p>';
+            invoiceHTML += '<p><strong>Time:</strong> 10:00 AM</p>';
+            invoiceHTML += '</div>';
+            invoiceHTML += '</div>';
+
             // Generate invoice HTML
-            var invoiceHTML = '<div class="invoice">';
-            invoiceHTML += '<table class="table table-sm invoice">';
+            invoiceHTML += '<div class="invoice">';
+            invoiceHTML += '<table class="table table-bordered mt-4 invoice">';
             invoiceHTML += '<thead>';
             invoiceHTML += '<tr>';
-            invoiceHTML += '<th scope="col">Item</th>';
-            invoiceHTML += '<th scope="col">Price</th>';
-            invoiceHTML += '<th scope="col">Qty</th>';
-            invoiceHTML += '<th scope="col">Discount</th>';
-            invoiceHTML += '<th scope="col">Total</th>';
+            invoiceHTML += '<th>Item</th>';
+            invoiceHTML += '<th>Price</th>';
+            invoiceHTML += '<th>Qty</th>';
+            invoiceHTML += '<th>Discount(%)</th>';
+            invoiceHTML += '<th>Total</th>';
             invoiceHTML += '</tr>';
             invoiceHTML += '</thead>';
-            invoiceHTML += '<tbody class="table-group-divider">';
+            invoiceHTML += '<tbody>';
               
             $('#dataTable tbody tr').each(function() {
                 var item = $(this).find('td:eq(1)').text();
@@ -262,67 +289,46 @@
             });
 
             invoiceHTML += '</tbody>';
+            invoiceHTML += '<tfoot>';
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Grand Total: </td>';
+            invoiceHTML += '<td>'+ grandTotal +'</td>';
+            invoiceHTML += '</tr>';
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Vat: </td>';
+            invoiceHTML += '<td>'+ totalVat +'</td>';
+            invoiceHTML += '</tr>';
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Payable Amount: </td>';
+            invoiceHTML += '<td>'+ payableAmount +'</td>';
+            invoiceHTML += '</tr>';
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Adjust: </td>';
+            invoiceHTML += '<td>'+ adjustValue +'</td>';
+            invoiceHTML += '</tr>'; 
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Payment Type: </td>';
+            invoiceHTML += '<td>'+ selectedOption +'</td>';
+            invoiceHTML += '</tr>';  
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Cash Received: </td>';
+            invoiceHTML += '<td>'+ cashReceive +'</td>';
+            invoiceHTML += '</tr>'; 
+            invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Cash Change: </td>';
+            invoiceHTML += '<td>'+ cashChange +'</td>';
+            invoiceHTML += '</tr>';                       
+            invoiceHTML += '</tfoot>';
             invoiceHTML += '</table>';
-            var selectedOption = $('#paymentTypeSelect').val();
-            var cashReceive = parseFloat(($('#receive').val()));
-            var cashChange = parseFloat(($('#dueField').val()));
-            var  adjustValue = 0.0;
-            if($('#adjust').val() !== '')
-            {
-                adjustValue = parseFloat($('#adjust').val());
-            }
             
-            invoiceHTML += '<p><strong>Grand Total:</strong> <span class="item-name">' + grandTotal + '  BDT</p>';
-            invoiceHTML += '<p><strong>Vat:</strong> ' + totalVat + '  BDT</p>';
-            invoiceHTML += '<p><strong>Total Payable:</strong> ' + payableAmount + '</p>';
-            invoiceHTML += '<p><strong>Adjust:</strong> ' + adjustValue + '  BDT</p>';
-            invoiceHTML += '<p><strong>Payment Type:</strong> ' + selectedOption + '</p>';
-            invoiceHTML += '<p><strong>Cash Receive:</strong> ' + cashReceive + '  BDT</p>';
-            invoiceHTML += '<p><strong>Cash Change:</strong> ' + cashChange + '  BDT</p>';
+            invoiceHTML += '<div class="text-center">';
+            invoiceHTML += '<button class="btn btn-primary mt-3">Print Invoice</button>';
+            invoiceHTML += '</div>';
             invoiceHTML += '</div>';
 
             // Display invoice
             $('#invoiceResult').html(invoiceHTML);
         });
-        // $(document).on('click', '#rcv', function() {
-            
-        //     var rcvValue = parseFloat($('#receive').val());
-        //     var payableValue = parseFloat($('#payable-amount').val());
-        //     var adjustValue = parseFloat($('#adjust').val());
-
-        //     var dueValue = rcvValue - (payableValue - adjustValue);
-        //     $('#dueField').val(dueValue);
-        //     //$('.qty').text(quantityValue);
-        //     //$('.total').text(totalPrice);
-        // });
-        // $('#finalSubmit-form').submit(function(event) {
-        //     event.preventDefault(); // Prevent default form submission
-        //     sl++;
-        //     var selectedOption = $('#floatingSelect').val(); // Get the selected option
-        //     unitprice = $('#id1').val();
-        //     quantity = $('#id2').val();
-        //     var total = unitprice * quantity;
-        //     total = total - (total * discount);
-        //     if (selectedOption !== '' ) {
-        //     var newRow = '<tr><td>' + sl + '</td><td>' + selectedOption + '</td><td class="unit">' + unitprice + '</td><td class="qty">' + quantity + '</td><td class="discount-col">' + discountInPercentage + '</td><td class="total">' + total + '</td><td><button class="increase"><i class="bi bi-caret-up-fill"></i></button><button class="decrease"><i class="bi bi-caret-down-fill"></i></button><button class="delete-btn"></i><i class="bi bi-trash-fill"></i></button></td></tr>'; // Create a new row with the selected option
-        //     $('#dataTable tbody').append(newRow); // Append the new row to the table body
-        //     }
-
-        //     grandTotal = 0;
-        //     $('#dataTable tbody tr').each(function() {
-        //         var price = parseInt($(this).find('td:eq(5)').text());
-        //         grandTotal += price;
-        //     });
-        //     totalVat = grandTotal * vat;
-        //     payableAmount = grandTotal + totalVat;
-        //     $('#grand-total').val(grandTotal);
-        //     $('#discount-btn').val(discountInPercentage);
-        //     $('#vat').val(totalVat);
-        //     $('#payable-amount').val(payableAmount);
-        //     // Clear the select dropdown
-        //     $('#mySelect').val('');
-
-        // });
         });
 
     </script>
