@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   </head>
   <body>
@@ -17,9 +19,9 @@
                     <h4 class="text-center mb-3">Add Product</h4>
                     <form action="" id="myForm">
                         <div class="d-flex justify-content-center">
-                            <div class="form-floating me-2">
-                                <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                                  <option selected>None</option>
+                            <div class="form-floating">
+                                <select class="form-select" id="floatingSelect">
+                                  <option value="0">None</option>
                                   <option value="Shirt-Tshirt">Shirt-Tshirt</option>
                                   <option value="Pant-Jeans">Pant-Jeans</option>
                                   <option value="Pant-Trouser">Pant-Trouser</option>
@@ -96,20 +98,34 @@
                                 <span class="input-group-text">Adjust</span>
                                 <input type="text" class="form-control" id="adjust">
                             </div>
-                            <div class="form-floating me-2 mb-3">
-                                <select class="form-select" id="paymentTypeSelect" aria-label="Floating label select example">
-                                  <option selected>Cash</option>
-                                  <option value="Card">Card</option>
+                            <div class="form-floating">
+                                <select class="form-select" id="paymentTypeSelect">
+                                  <option value="cash">Cash</option>
+                                  <option value="card">Card</option>
                                 </select>
                                 <label for="paymentTypeSelect">Payment Type</label>
                             </div>
-                            <div class="input-group mb-3">
+                            <div id="card-details" style="display: none;">
+                                <div class="form-floating mt-3">
+                                    <select class="form-select" id="bankSelect">
+                                        <option value="dbbl">DBBL</option>
+                                        <option value="brac">Brac</option>
+                                        <option value="islami">Islami Bank</option>
+                                    </select>
+                                    <label for="bankSelect">Bank Name</label>
+                                </div>
+                                <div class="input-group mt-3">
+                                    <span class="input-group-text">Card No:</span>
+                                    <input type="number" class="form-control" id="card-no">
+                                </div>
+                            </div>
+                            <div class="input-group mb-3 mt-3">
                                 <span class="input-group-text">Cash Receive BDT</span>
-                                <input type="text" class="form-control" id="receive">
+                                <input type="number" class="form-control" id="receive">
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Change BDT</span>
-                                <input type="text" class="form-control" id="dueField" readonly>
+                                <input type="number" class="form-control" id="dueField" readonly>
                             </div>
                             <button class="btn btn-primary">Submit</button>
                         </div>
@@ -119,8 +135,17 @@
             </div>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+        $('select').select2();
+        $('#paymentTypeSelect').change(function() {
+            if ($(this).val() === 'card') {
+                $('#card-details').show();
+            } else {
+                $('#card-details').hide();
+            }
+        });
         $('#receive').on('change', function() {
         var adjustValue = 0.0;
         var rcvValue = parseFloat($('#receive').val());
@@ -157,11 +182,12 @@
             $('#dataTable tbody').append(newRow); // Append the new row to the table body
             }
 
-            grandTotal = 0;
+            grandTotal = 0.0;
             $('#dataTable tbody tr').each(function() {
-                var price = parseInt($(this).find('td:eq(5)').text());
+                var price = parseFloat($(this).find('td:eq(5)').text());
                 grandTotal += price;
             });
+
             totalVat = grandTotal * vat;
             payableAmount = grandTotal + totalVat;
             $('#grand-total').val(grandTotal);
@@ -169,7 +195,9 @@
             $('#vat').val(totalVat);
             $('#payable-amount').val(payableAmount);
             // Clear the select dropdown
-            $('#mySelect').val('');
+            $('#floatingSelect').val('');
+            $('#id1').val('');
+            $('#id2').val('');
 
         });
         $(document).on('click', '.delete-btn', function() {
@@ -189,9 +217,9 @@
             totalElement.text(totalValue);
 
 
-            grandTotal = 0;
+            grandTotal = 0.0;
             $('#dataTable tbody tr').each(function() {
-                var price = parseInt($(this).find('td:eq(5)').text());
+                var price = parseFloat($(this).find('td:eq(5)').text());
                 grandTotal += price;
             });
             totalVat = grandTotal * vat;
@@ -216,11 +244,13 @@
             totalValue = totalValue - (totalValue*discount);
             totalElement.text(totalValue);
 
-            grandTotal = 0;
+            grandTotal = 0.0;
+
             $('#dataTable tbody tr').each(function() {
-                var price = parseInt($(this).find('td:eq(5)').text());
+                var price = parseFloat($(this).find('td:eq(5)').text());
                 grandTotal += price;
             });
+
             totalVat = grandTotal * vat;
             payableAmount = grandTotal + totalVat;
             $('#grand-total').val(grandTotal);
@@ -233,14 +263,17 @@
             event.preventDefault(); // Prevent form submission
 
             var selectedOption = $('#paymentTypeSelect').val();
+            var bankName = $('#bankSelect').val();
             var cashReceive = parseFloat(($('#receive').val()));
             var cashChange = parseFloat(($('#dueField').val()));
+            var cardNo = parseInt(($('#card-no').val()));
             var  adjustValue = 0.0;
             if($('#adjust').val() !== '')
             {
                 adjustValue = parseFloat($('#adjust').val());
             }
 
+            var bill = payableAmount-adjustValue;
             var invoiceHTML = '<h2 class="text-center mb-4 p-3">Point of Sale Invoice</h2>';
             invoiceHTML += '<div class="row p-3">';
             invoiceHTML += '<div class="col-md-6">';
@@ -274,10 +307,10 @@
               
             $('#dataTable tbody tr').each(function() {
                 var item = $(this).find('td:eq(1)').text();
-                var itemPrice = parseInt($(this).find('td:eq(2)').text());
-                var itemQty = parseInt($(this).find('td:eq(3)').text());
-                var itemDiscount = parseInt($(this).find('td:eq(4)').text());
-                var itemTotalPrice = parseInt($(this).find('td:eq(5)').text());
+                var itemPrice = parseFloat($(this).find('td:eq(2)').text());
+                var itemQty = parseFloat($(this).find('td:eq(3)').text());
+                var itemDiscount = parseFloat($(this).find('td:eq(4)').text());
+                var itemTotalPrice = parseFloat($(this).find('td:eq(5)').text());
                 
                 invoiceHTML += '<tr>';
                 invoiceHTML += '<td>'+ item +'</td>';
@@ -307,9 +340,25 @@
             invoiceHTML += '<td>'+ adjustValue +'</td>';
             invoiceHTML += '</tr>'; 
             invoiceHTML += '<tr>';
+            invoiceHTML += '<td colspan="4" class="text-right">Bill: </td>';
+            invoiceHTML += '<td>'+ bill +'</td>';
+            invoiceHTML += '</tr>'; 
+            invoiceHTML += '<tr>';
             invoiceHTML += '<td colspan="4" class="text-right">Payment Type: </td>';
             invoiceHTML += '<td>'+ selectedOption +'</td>';
-            invoiceHTML += '</tr>';  
+            invoiceHTML += '</tr>';
+            if(selectedOption == 'card')
+            {
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Bank Name: </td>';
+                invoiceHTML += '<td>'+ bankName +'</td>';
+                invoiceHTML += '</tr>';
+
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Card No: </td>';
+                invoiceHTML += '<td>'+ cardNo +'</td>';
+                invoiceHTML += '</tr>';
+            }  
             invoiceHTML += '<tr>';
             invoiceHTML += '<td colspan="4" class="text-right">Cash Received: </td>';
             invoiceHTML += '<td>'+ cashReceive +'</td>';
