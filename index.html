@@ -59,7 +59,7 @@
                             <th scope="col">Item</th>
                             <th scope="col">Unit Price</th>
                             <th scope="col">Quantity</th>
-                            <th scope="col">Discount(percent)</th>
+                            <th scope="col">Discount(%)</th>
                             <th scope="col">Total</th>
                             <th scope="col">Action</th>
                           </tr>
@@ -84,61 +84,59 @@
                         <div class="form-group col-8">                                                   
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Grand Total</span>
-                                <input type="text" class="form-control" id="grand-total" readonly>                                
+                                <input type="text" name="grandTotal" class="form-control" id="grand-total" readonly>                                
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text" id="basic-addon2">Discount</span>
-                                <input type="text" class="form-control" id="discount-btn" readonly>
+                                <input type="text" name="discount" class="form-control" id="discount-btn" readonly>
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Vat(5%)</span>
-                                <input type="text" class="form-control" id="vat" readonly>
+                                <input type="text" name="vat" class="form-control" id="vat" readonly>
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Payable Amount</span>
-                                <input type="text" class="form-control" id="payable-amount" readonly>
+                                <input type="text" name="payableAmount" class="form-control" id="payable-amount" readonly>
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Adjust</span>
-                                <input type="text" class="form-control" id="adjust">
+                                <input type="text" name="adjustedAmount" class="form-control" id="adjust">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Total Bill</span>
+                                <input type="number" name="bill" class="form-control" id="bill" readonly>
                             </div>
                             <div class="input-group mb-3">
                                 <label class="input-group-text" for="paymentTypeSelect">Payment Type</label>
-                                <select class="form-select" id="paymentTypeSelect">
+                                <select class="form-select" name="paymentType" id="paymentTypeSelect">
                                   <option value="cash">Cash</option>
                                   <option value="card">Card</option>
                                 </select>
                             </div>
-                            <!-- <div class="form-floating">
-                                <select class="form-select" id="paymentTypeSelect">
-                                  <option value="cash">Cash</option>
-                                  <option value="card">Card</option>
+                            
+                            <div class="input-group mt-3" id="bank-select-section" style="display: none;">
+                                <label class="input-group-text" for="bankSelect">Bank Name</label>
+                                <select class="form-select" name="bankName" id="bankSelect" >
+                                    <option value="">None</option>
+                                    <option value="dbbl">DBBL</option>
+                                    <option value="brac">Brac</option>
+                                    <option value="islami">Islami Bank</option>
                                 </select>
-                                <label for="paymentTypeSelect">Payment Type</label>
-                            </div> -->
-                            <div id="card-details" style="display: none;">
-                                <div class="form-floating mt-3">
-                                    <select class="form-select" id="bankSelect">
-                                        <option value="dbbl">DBBL</option>
-                                        <option value="brac">Brac</option>
-                                        <option value="islami">Islami Bank</option>
-                                    </select>
-                                    <label for="bankSelect">Bank Name</label>
-                                </div>
-                                <div class="input-group mt-3">
-                                    <span class="input-group-text">Card No:</span>
-                                    <input type="number" class="form-control" id="card-no">
-                                </div>
                             </div>
+                            <div class="input-group mt-3" id="card-no-section" style="display: none;">
+                                <span class="input-group-text">Card No:</span>
+                                <input type="number" name="cardNo" class="form-control" id="card-no">
+                            </div>
+
                             <div class="input-group mb-3 mt-3">
                                 <span class="input-group-text">Cash Receive BDT</span>
-                                <input type="number" class="form-control" id="receive">
+                                <input type="number" name="cashReceive" class="form-control" id="receive">
                             </div>
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Change BDT</span>
-                                <input type="number" class="form-control" id="dueField" readonly>
+                                <input type="number" name="cashChange" class="form-control" id="dueField" readonly>
                             </div>
-                            <button class="btn btn-primary">Submit</button>
+                            <input type="submit" class="btn btn-primary" value="Submit">
                         </div>
                     </form>
                 </div>
@@ -149,247 +147,286 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-        $('#floatingSelect').select2();
-        $('#paymentTypeSelect').change(function() {
-            if ($(this).val() === 'card') {
-                $('#card-details').show();
-            } else {
-                $('#card-details').hide();
-            }
-        });
-        $('#receive').on('change', function() {
-        var adjustValue = 0.0;
-        var rcvValue = parseFloat($('#receive').val());
-        var payableValue = parseFloat($('#payable-amount').val());
+            var sl = 0;
+            var quantity;
+            var unitprice;
+            var grandTotal = 0.0;
+            var discountInPercentage = 15;
+            var discount = discountInPercentage/100;
+            var vat = 0.05;
+            var totalVat = 0.0;
+            var payableAmount = 0.0;
+            var bill = 0.0;
 
-        if($('#adjust').val() !== '')
-        {
-            adjustValue = parseFloat($('#adjust').val());
-        }
-        var changeBDT = rcvValue - (payableValue-adjustValue);
-    
-        $('#dueField').val(changeBDT);
-        });
-        // Handle form submission
-        var sl = 0;
-        var quantity;
-        var unitprice;
-        var grandTotal = 0.0;
-        var discountInPercentage = 15;
-        var discount = discountInPercentage/100;
-        var vat = 0.05;
-        var totalVat = 0.0;
-        var payableAmount = 0.0;
-        $('#myForm').submit(function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sl++;
-            var selectedOption = $('#floatingSelect').val(); // Get the selected option
-            unitprice = $('#id1').val();
-            quantity = $('#id2').val();
-            var total = unitprice * quantity;
-            total = total - (total * discount);
-            if (selectedOption !== '' ) {
-            var newRow = '<tr><td>' + sl + '</td><td>' + selectedOption + '</td><td class="unit">' + unitprice + '</td><td class="qty">' + quantity + '</td><td class="discount-col">' + discountInPercentage + '</td><td class="total">' + total + '</td><td><button class="increase"><i class="bi bi-caret-up-fill"></i></button><button class="decrease"><i class="bi bi-caret-down-fill"></i></button><button class="delete-btn"></i><i class="bi bi-trash-fill"></i></button></td></tr>'; // Create a new row with the selected option
-            $('#dataTable tbody').append(newRow); // Append the new row to the table body
-            }
+            $('#floatingSelect').select2();
 
-            grandTotal = 0.0;
-            $('#dataTable tbody tr').each(function() {
-                var price = parseFloat($(this).find('td:eq(5)').text());
-                grandTotal += price;
+            $('#adjust').change(function() {
+                var adjust = parseFloat($('#adjust').val());
+                var payable = parseFloat($('#payable-amount').val());
+                bill = payable - adjust;
+                $('#bill').val(bill);
             });
 
-            totalVat = grandTotal * vat;
-            payableAmount = grandTotal + totalVat;
-            $('#grand-total').val(grandTotal);
-            $('#discount-btn').val(discountInPercentage);
-            $('#vat').val(totalVat);
-            $('#payable-amount').val(payableAmount);
-            // Clear the select dropdown
-            $('#floatingSelect').val('');
-            $('#id1').val('');
-            $('#id2').val('');
-
-        });
-        $(document).on('click', '.delete-btn', function() {
-        $(this).closest('tr').remove(); // Remove the row containing the clicked delete button
-        });
-        $(document).on('click', '.increase', function() {
-            var quantityElement = $(this).closest('tr').find('.qty');
-            var quantityValue = parseInt(quantityElement.text())+1;
-            quantityElement.text(quantityValue);
-
-            var unitPriceElement = $(this).closest('tr').find('.unit');
-            var unitPriceValue = parseInt(unitPriceElement.text());
-
-            var totalElement = $(this).closest('tr').find('.total');
-            var totalValue = quantityValue * unitPriceValue;
-            totalValue = totalValue - (totalValue*discount);
-            totalElement.text(totalValue);
-
-
-            grandTotal = 0.0;
-            $('#dataTable tbody tr').each(function() {
-                var price = parseFloat($(this).find('td:eq(5)').text());
-                grandTotal += price;
-            });
-            totalVat = grandTotal * vat;
-            payableAmount = grandTotal + totalVat;
-
-            $('#grand-total').val(grandTotal);
-            $('#vat').val(totalVat);
-            $('#payable-amount').val(payableAmount);
-            //$('.qty').text(quantityValue);
-            //$('.total').text(totalPrice);
-        });
-        $(document).on('click', '.decrease', function() {
-            var quantityElement = $(this).closest('tr').find('.qty');
-            var quantityValue = parseInt(quantityElement.text())-1;
-            quantityElement.text(quantityValue);
-
-            var unitPriceElement = $(this).closest('tr').find('.unit');
-            var unitPriceValue = parseInt(unitPriceElement.text());
-
-            var totalElement = $(this).closest('tr').find('.total');
-            var totalValue = quantityValue * unitPriceValue;
-            totalValue = totalValue - (totalValue*discount);
-            totalElement.text(totalValue);
-
-            grandTotal = 0.0;
-
-            $('#dataTable tbody tr').each(function() {
-                var price = parseFloat($(this).find('td:eq(5)').text());
-                grandTotal += price;
-            });
-
-            totalVat = grandTotal * vat;
-            payableAmount = grandTotal + totalVat;
-            $('#grand-total').val(grandTotal);
-            $('#vat').val(totalVat);
-            $('#payable-amount').val(payableAmount);
-            //$('.qty').text(quantityValue);
-            //$('.total').text(totalPrice);
-        });
-        $('#finalSubmit-form').submit(function(event) {
-            event.preventDefault(); // Prevent form submission
-
-            var selectedOption = $('#paymentTypeSelect').val();
-            var bankName = $('#bankSelect').val();
-            var cashReceive = parseFloat(($('#receive').val()));
-            var cashChange = parseFloat(($('#dueField').val()));
-            var cardNo = parseInt(($('#card-no').val()));
-            var  adjustValue = 0.0;
-            if($('#adjust').val() !== '')
-            {
-                adjustValue = parseFloat($('#adjust').val());
-            }
-
-            var bill = payableAmount-adjustValue;
-            var invoiceHTML = '<h2 class="text-center mb-4 p-3">Point of Sale Invoice</h2>';
-            invoiceHTML += '<div class="row p-3">';
-            invoiceHTML += '<div class="col-md-6">';
-            invoiceHTML += '<h5>Company Information:</h5>';
-            invoiceHTML += '<p>Company Name</p>';
-            invoiceHTML += '<p>Address Line 1</p>';
-            invoiceHTML += '<p>Address Line 2</p>';
-            invoiceHTML += '<p>City, State, Zip Code</p>';
-            invoiceHTML += '</div>';
-            invoiceHTML += '<div class="col-md-6 text-md-right">';
-            invoiceHTML += '<h5>Bill Details:</h5>';
-            invoiceHTML += '<p><strong>Bill No:</strong> 12345</p>';
-            invoiceHTML += '<p><strong>Date:</strong> July 11, 2023</p>';
-            invoiceHTML += '<p><strong>Time:</strong> 10:00 AM</p>';
-            invoiceHTML += '</div>';
-            invoiceHTML += '</div>';
-
-            // Generate invoice HTML
-            invoiceHTML += '<div class="invoice">';
-            invoiceHTML += '<table class="table table-bordered mt-4 invoice">';
-            invoiceHTML += '<thead>';
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<th>Item</th>';
-            invoiceHTML += '<th>Price</th>';
-            invoiceHTML += '<th>Qty</th>';
-            invoiceHTML += '<th>Discount(%)</th>';
-            invoiceHTML += '<th>Total</th>';
-            invoiceHTML += '</tr>';
-            invoiceHTML += '</thead>';
-            invoiceHTML += '<tbody>';
-              
-            $('#dataTable tbody tr').each(function() {
-                var item = $(this).find('td:eq(1)').text();
-                var itemPrice = parseFloat($(this).find('td:eq(2)').text());
-                var itemQty = parseFloat($(this).find('td:eq(3)').text());
-                var itemDiscount = parseFloat($(this).find('td:eq(4)').text());
-                var itemTotalPrice = parseFloat($(this).find('td:eq(5)').text());
+            $('#paymentTypeSelect').change(function() {
+                if ($(this).val() === 'card') {
+                    $('#bank-select-section').show();
+                }else {
+                    $('#bank-select-section').hide();
+                    $('#card-no-section').hide();
+                    $('#bankSelect').val("");
+                }
+                $('#bankSelect').change(function() {
+                    if ($(this).val() != '') {
+                        $('#card-no-section').show();
+                    }else {
+                        $('#card-no-section').hide();
+                        $('#bankSelect').val("");
+                    }               
+                });
                 
-                invoiceHTML += '<tr>';
-                invoiceHTML += '<td>'+ item +'</td>';
-                invoiceHTML += '<td>'+ itemPrice +'</td>';
-                invoiceHTML += '<td>'+ itemQty +'</td>';
-                invoiceHTML += '<td>'+ itemDiscount +'</td>';
-                invoiceHTML += '<td>'+ itemTotalPrice +'</td>';
-                invoiceHTML += '</tr>'; 
             });
 
-            invoiceHTML += '</tbody>';
-            invoiceHTML += '<tfoot>';
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Grand Total: </td>';
-            invoiceHTML += '<td>'+ grandTotal +'</td>';
-            invoiceHTML += '</tr>';
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Vat: </td>';
-            invoiceHTML += '<td>'+ totalVat +'</td>';
-            invoiceHTML += '</tr>';
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Payable Amount: </td>';
-            invoiceHTML += '<td>'+ payableAmount +'</td>';
-            invoiceHTML += '</tr>';
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Adjust: </td>';
-            invoiceHTML += '<td>'+ adjustValue +'</td>';
-            invoiceHTML += '</tr>'; 
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Bill: </td>';
-            invoiceHTML += '<td>'+ bill +'</td>';
-            invoiceHTML += '</tr>'; 
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Payment Type: </td>';
-            invoiceHTML += '<td>'+ selectedOption +'</td>';
-            invoiceHTML += '</tr>';
-            if(selectedOption == 'card')
-            {
-                invoiceHTML += '<tr>';
-                invoiceHTML += '<td colspan="4" class="text-right">Bank Name: </td>';
-                invoiceHTML += '<td>'+ bankName +'</td>';
-                invoiceHTML += '</tr>';
+            $('#receive').on('change', function() {
+                var adjustValue = 0.0;
+                var rcvValue = parseFloat($('#receive').val());
+                var payableValue = parseFloat($('#payable-amount').val());
 
-                invoiceHTML += '<tr>';
-                invoiceHTML += '<td colspan="4" class="text-right">Card No: </td>';
-                invoiceHTML += '<td>'+ cardNo +'</td>';
-                invoiceHTML += '</tr>';
-            }  
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Cash Received: </td>';
-            invoiceHTML += '<td>'+ cashReceive +'</td>';
-            invoiceHTML += '</tr>'; 
-            invoiceHTML += '<tr>';
-            invoiceHTML += '<td colspan="4" class="text-right">Cash Change: </td>';
-            invoiceHTML += '<td>'+ cashChange +'</td>';
-            invoiceHTML += '</tr>';                       
-            invoiceHTML += '</tfoot>';
-            invoiceHTML += '</table>';
+                if($('#adjust').val() !== '')
+                {
+                    adjustValue = parseFloat($('#adjust').val());
+                }
+                var changeBDT = rcvValue - (payableValue-adjustValue);
             
-            invoiceHTML += '<div class="text-center">';
-            invoiceHTML += '<button class="btn btn-primary mt-3">Print Invoice</button>';
-            invoiceHTML += '</div>';
-            invoiceHTML += '</div>';
+                $('#dueField').val(changeBDT);
+            });
+            
+            $('#myForm').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+                sl++;
+                var selectedOption = $('#floatingSelect').val(); // Get the selected option
+                unitprice = $('#id1').val();
+                quantity = $('#id2').val();
+                var total = unitprice * quantity;
+                total = total - (total * discount);
+                if (selectedOption !== '' ) {
+                    var newRow = '<tr><td>' + sl + '</td><td>' + selectedOption + '</td><td class="unit">' + unitprice + '</td><td class="qty">' + quantity + '</td><td class="discount-col">' + discountInPercentage + '</td><td class="total">' + total + '</td><td><button class="increase"><i class="bi bi-caret-up-fill"></i></button><button class="decrease"><i class="bi bi-caret-down-fill"></i></button><button class="delete-btn"></i><i class="bi bi-trash-fill"></i></button></td></tr>'; // Create a new row with the selected option
+                    $('#dataTable tbody').append(newRow); // Append the new row to the table body
+                }
 
-            // Display invoice
-            $('#invoiceResult').html(invoiceHTML);
+                grandTotal = 0.0;
+                $('#dataTable tbody tr').each(function() {
+                    var price = parseFloat($(this).find('td:eq(5)').text());
+                    grandTotal += price;
+                });
+
+                totalVat = grandTotal * vat;
+                payableAmount = grandTotal + totalVat;
+                bill = payableAmount;
+                $('#grand-total').val(grandTotal);
+                $('#discount-btn').val(discountInPercentage);
+                $('#vat').val(totalVat);
+                $('#payable-amount').val(payableAmount);
+                $('#bill').val(bill);
+                $('#floatingSelect').val('');
+                $('#id1').val('');
+                $('#id2').val('');
+
+            });
+
+            $(document).on('click', '.delete-btn', function() {
+                $(this).closest('tr').remove(); // Remove the row containing the clicked delete button
+            });
+
+            $(document).on('click', '.increase', function() {
+                var quantityElement = $(this).closest('tr').find('.qty');
+                var quantityValue = parseInt(quantityElement.text())+1;
+                quantityElement.text(quantityValue);
+
+                var unitPriceElement = $(this).closest('tr').find('.unit');
+                var unitPriceValue = parseInt(unitPriceElement.text());
+
+                var totalElement = $(this).closest('tr').find('.total');
+                var totalValue = quantityValue * unitPriceValue;
+                totalValue = totalValue - (totalValue*discount);
+                totalElement.text(totalValue);
+
+
+                grandTotal = 0.0;
+                $('#dataTable tbody tr').each(function() {
+                    var price = parseFloat($(this).find('td:eq(5)').text());
+                    grandTotal += price;
+                });
+                totalVat = grandTotal * vat;
+                payableAmount = grandTotal + totalVat;
+
+                $('#grand-total').val(grandTotal);
+                $('#vat').val(totalVat);
+                $('#payable-amount').val(payableAmount);
+                //$('.qty').text(quantityValue);
+                //$('.total').text(totalPrice);
+            });
+            $(document).on('click', '.decrease', function() {
+                var quantityElement = $(this).closest('tr').find('.qty');
+                var quantityValue = parseInt(quantityElement.text())-1;
+                quantityElement.text(quantityValue);
+
+                var unitPriceElement = $(this).closest('tr').find('.unit');
+                var unitPriceValue = parseInt(unitPriceElement.text());
+
+                var totalElement = $(this).closest('tr').find('.total');
+                var totalValue = quantityValue * unitPriceValue;
+                totalValue = totalValue - (totalValue*discount);
+                totalElement.text(totalValue);
+
+                grandTotal = 0.0;
+
+                $('#dataTable tbody tr').each(function() {
+                    var price = parseFloat($(this).find('td:eq(5)').text());
+                    grandTotal += price;
+                });
+
+                totalVat = grandTotal * vat;
+                payableAmount = grandTotal + totalVat;
+                $('#grand-total').val(grandTotal);
+                $('#vat').val(totalVat);
+                $('#payable-amount').val(payableAmount);
+                //$('.qty').text(quantityValue);
+                //$('.total').text(totalPrice);
+            });
+            $('#finalSubmit-form').submit(function(event) {
+                
+                event.preventDefault(); // Prevent form submission
+                
+                var formData = $(this).serializeArray();
+                var jsonObject = {};
+                console.log(formData);
+                $.each(formData, function(index, field) {
+                    jsonObject[field.name] = field.value;
+                });
+                console.log(JSON.stringify(jsonObject));
+
+
+                var selectedOption = $('#paymentTypeSelect').val();
+                var bankName = $('#bankSelect').val();
+                var cashReceive = parseFloat(($('#receive').val()));
+                var cashChange = parseFloat(($('#dueField').val()));
+                var cardNo = parseInt(($('#card-no').val()));
+                var  adjustValue = 0.0;
+                if($('#adjust').val() !== '')
+                {
+                    adjustValue = parseFloat($('#adjust').val());
+                }
+
+                var bill = payableAmount-adjustValue;
+                var invoiceHTML = '<h2 class="text-center mb-4 p-3">Point of Sale Invoice</h2>';
+                invoiceHTML += '<div class="row p-3">';
+                invoiceHTML += '<div class="col-md-6">';
+                invoiceHTML += '<h5>Company Information:</h5>';
+                invoiceHTML += '<p>Company Name</p>';
+                invoiceHTML += '<p>Address Line 1</p>';
+                invoiceHTML += '<p>Address Line 2</p>';
+                invoiceHTML += '<p>City, State, Zip Code</p>';
+                invoiceHTML += '</div>';
+                invoiceHTML += '<div class="col-md-6 text-md-right">';
+                invoiceHTML += '<h5>Bill Details:</h5>';
+                invoiceHTML += '<p><strong>Bill No:</strong> 12345</p>';
+                invoiceHTML += '<p><strong>Date:</strong> July 11, 2023</p>';
+                invoiceHTML += '<p><strong>Time:</strong> 10:00 AM</p>';
+                invoiceHTML += '</div>';
+                invoiceHTML += '</div>';
+
+                // Generate invoice HTML
+                invoiceHTML += '<div class="invoice">';
+                invoiceHTML += '<table class="table table-bordered mt-4 invoice">';
+                invoiceHTML += '<thead>';
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<th>Item</th>';
+                invoiceHTML += '<th>Price</th>';
+                invoiceHTML += '<th>Qty</th>';
+                invoiceHTML += '<th>Discount(%)</th>';
+                invoiceHTML += '<th>Total</th>';
+                invoiceHTML += '</tr>';
+                invoiceHTML += '</thead>';
+                invoiceHTML += '<tbody>';
+                
+                $('#dataTable tbody tr').each(function() {
+                    var item = $(this).find('td:eq(1)').text();
+                    var itemPrice = parseFloat($(this).find('td:eq(2)').text());
+                    var itemQty = parseFloat($(this).find('td:eq(3)').text());
+                    var itemDiscount = parseFloat($(this).find('td:eq(4)').text());
+                    var itemTotalPrice = parseFloat($(this).find('td:eq(5)').text());
+                    
+                    invoiceHTML += '<tr>';
+                    invoiceHTML += '<td>'+ item +'</td>';
+                    invoiceHTML += '<td>'+ itemPrice +'</td>';
+                    invoiceHTML += '<td>'+ itemQty +'</td>';
+                    invoiceHTML += '<td>'+ itemDiscount +'</td>';
+                    invoiceHTML += '<td>'+ itemTotalPrice +'</td>';
+                    invoiceHTML += '</tr>'; 
+                });
+
+                invoiceHTML += '</tbody>';
+                invoiceHTML += '<tfoot>';
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Grand Total: </td>';
+                invoiceHTML += '<td>'+ grandTotal +'</td>';
+                invoiceHTML += '</tr>';
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Vat: </td>';
+                invoiceHTML += '<td>'+ totalVat +'</td>';
+                invoiceHTML += '</tr>';
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Payable Amount: </td>';
+                invoiceHTML += '<td>'+ payableAmount +'</td>';
+                invoiceHTML += '</tr>';
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Adjust: </td>';
+                invoiceHTML += '<td>'+ adjustValue +'</td>';
+                invoiceHTML += '</tr>'; 
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Bill: </td>';
+                invoiceHTML += '<td>'+ bill +'</td>';
+                invoiceHTML += '</tr>'; 
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Payment Type: </td>';
+                invoiceHTML += '<td>'+ selectedOption +'</td>';
+                invoiceHTML += '</tr>';
+                if(selectedOption == 'card')
+                {
+                    invoiceHTML += '<tr>';
+                    invoiceHTML += '<td colspan="4" class="text-right">Bank Name: </td>';
+                    invoiceHTML += '<td>'+ bankName +'</td>';
+                    invoiceHTML += '</tr>';
+
+                    if(bankName !== '')
+                    {
+                        invoiceHTML += '<tr>';
+                        invoiceHTML += '<td colspan="4" class="text-right">Card No: </td>';
+                        invoiceHTML += '<td>'+ cardNo +'</td>';
+                        invoiceHTML += '</tr>';
+                    }                   
+                }  
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Cash Received: </td>';
+                invoiceHTML += '<td>'+ cashReceive +'</td>';
+                invoiceHTML += '</tr>'; 
+                invoiceHTML += '<tr>';
+                invoiceHTML += '<td colspan="4" class="text-right">Cash Change: </td>';
+                invoiceHTML += '<td>'+ cashChange +'</td>';
+                invoiceHTML += '</tr>';                       
+                invoiceHTML += '</tfoot>';
+                invoiceHTML += '</table>';
+                
+                invoiceHTML += '<div class="text-center">';
+                invoiceHTML += '<button class="btn btn-primary mt-3">Print Invoice</button>';
+                invoiceHTML += '</div>';
+                invoiceHTML += '</div>';
+
+                // Display invoice
+                $('#invoiceResult').html(invoiceHTML);
+            });
         });
-        });
+
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
