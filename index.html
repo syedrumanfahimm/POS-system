@@ -139,6 +139,9 @@
                             <input type="submit" class="btn btn-primary" value="Submit">
                         </div>
                     </form>
+                    <div class="container" id="json-view">
+
+                    </div>
                 </div>
 
             </div>
@@ -174,6 +177,7 @@
                     $('#bank-select-section').hide();
                     $('#card-no-section').hide();
                     $('#bankSelect').val("");
+                    $('#card-no').val("");
                 }
                 $('#bankSelect').change(function() {
                     if ($(this).val() != '') {
@@ -181,6 +185,7 @@
                     }else {
                         $('#card-no-section').hide();
                         $('#bankSelect').val("");
+                        $('#card-no').val("");
                     }               
                 });
                 
@@ -299,12 +304,15 @@
                 
                 var formData = $(this).serializeArray();
                 var jsonObject = {};
-                console.log(formData);
                 $.each(formData, function(index, field) {
                     jsonObject[field.name] = field.value;
                 });
                 console.log(JSON.stringify(jsonObject));
 
+                var jsonHtml = '<h2 class="text-center">JSON Data</h2>';
+                
+                jsonHtml += '<p>'+ JSON.stringify(jsonObject) +'</p>';
+                $('#json-view').html(jsonHtml);
 
                 var selectedOption = $('#paymentTypeSelect').val();
                 var bankName = $('#bankSelect').val();
